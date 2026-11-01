@@ -1,0 +1,13 @@
+{
+  "name": "biblioteca",
+  "private": true,
+  "scripts": {
+    "start": "node appCompleta.js",
+    "probar-conexion": "node prueba.js",
+    "backup": "powershell -NoProfile -File backup.ps1"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "mongodb": "^7.7.0"
+  }
+}
