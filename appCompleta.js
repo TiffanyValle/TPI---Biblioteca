@@ -72,16 +72,19 @@ async function listarLibros(libros) {
   console.log("Total de libros activos:", resultado.length);
 }
 
-// READ: BUSCAR LIBRO POR ID
+// READ: BUSCAR LIBRO POR ISBN
 
 async function buscarLibro(libros) {
   console.log("\n--- BUSCAR LIBRO ---");
 
-  const id = await obtenerId("ID del libro: ");
-  if (!id) return;
+  const isbnBusqueda = await preguntar("ISBN del libro: ");
+  if (!isbnBusqueda) {
+    console.log("Error: el ISBN es obligatorio.");
+    return;
+  }
 
   const libro = await libros.findOne({
-    _id: id,
+    isbn: isbnBusqueda,
     activo: true
   });
 
@@ -154,11 +157,14 @@ async function crearLibro(libros) {
 async function modificarLibro(libros) {
   console.log("\n--- MODIFICAR LIBRO ---");
 
-  const id = await obtenerId("ID del libro: ");
-  if (!id) return;
+  const isbnBusqueda = await preguntar("ISBN del libro: ");
+  if (!isbnBusqueda) {
+    console.log("Error: el ISBN es obligatorio.");
+    return;
+  }
 
   const libro = await libros.findOne({
-    _id: id,
+    isbn: isbnBusqueda,
     activo: true
   });
 
@@ -182,7 +188,7 @@ async function modificarLibro(libros) {
   if (isbn) {
     const existente = await libros.findOne({
       isbn,
-      _id: { $ne: id }
+      _id: { $ne: libro._id }
     });
 
     if (existente) {
@@ -216,7 +222,7 @@ async function modificarLibro(libros) {
   cambios.updatedAt = new Date();
 
   await libros.updateOne(
-    { _id: id },
+    { _id: libro._id },
     { $set: cambios }
   );
 
@@ -228,11 +234,14 @@ async function modificarLibro(libros) {
 async function eliminarLibro(libros, prestamos) {
   console.log("\n--- ELIMINAR LIBRO ---");
 
-  const id = await obtenerId("ID del libro: ");
-  if (!id) return;
+  const isbnBusqueda = await preguntar("ISBN del libro: ");
+  if (!isbnBusqueda) {
+    console.log("Error: el ISBN es obligatorio.");
+    return;
+  }
 
   const libro = await libros.findOne({
-    _id: id,
+    isbn: isbnBusqueda,
     activo: true
   });
 
@@ -242,9 +251,9 @@ async function eliminarLibro(libros, prestamos) {
   }
 
   const prestamosPendientes = await prestamos.countDocuments({
-    libroId: id,
+    libroId: libro._id,
     activo: true,
-    estado: "prestado"
+    estado: "activo"
   });
 
   if (prestamosPendientes > 0) {
@@ -264,7 +273,7 @@ async function eliminarLibro(libros, prestamos) {
   }
 
   await libros.updateOne(
-    { _id: id },
+    { _id: libro._id },
     {
       $set: {
         activo: false,
@@ -308,16 +317,19 @@ async function listarSocios(socios) {
   console.log("Total de socios activos:", resultado.length);
 }
 
-// READ: BUSCAR SOCIO POR ID
+// READ: BUSCAR SOCIO POR DNI
 
 async function buscarSocio(socios) {
   console.log("\n--- BUSCAR SOCIO ---");
 
-  const id = await obtenerId("ID del socio: ");
-  if (!id) return;
+  const dniBusqueda = (await preguntar("DNI del socio: ")).toUpperCase();
+  if (!dniBusqueda) {
+    console.log("Error: el DNI es obligatorio.");
+    return;
+  }
 
   const socio = await socios.findOne({
-    _id: id,
+    dni: dniBusqueda,
     activo: true
   });
 
@@ -380,11 +392,14 @@ async function crearSocio(socios) {
 async function modificarSocio(socios) {
   console.log("\n--- MODIFICAR SOCIO ---");
 
-  const id = await obtenerId("ID del socio: ");
-  if (!id) return;
+  const dniBusqueda = (await preguntar("DNI del socio: ")).toUpperCase();
+  if (!dniBusqueda) {
+    console.log("Error: el DNI es obligatorio.");
+    return;
+  }
 
   const socio = await socios.findOne({
-    _id: id,
+    dni: dniBusqueda,
     activo: true
   });
 
@@ -411,7 +426,7 @@ async function modificarSocio(socios) {
   if (dni) {
     const existente = await socios.findOne({
       dni,
-      _id: { $ne: id }
+      _id: { $ne: socio._id }
     });
 
     if (existente) {
@@ -430,7 +445,7 @@ async function modificarSocio(socios) {
   cambios.updatedAt = new Date();
 
   await socios.updateOne(
-    { _id: id },
+    { _id: socio._id },
     { $set: cambios }
   );
 
@@ -442,11 +457,14 @@ async function modificarSocio(socios) {
 async function eliminarSocio(socios, prestamos) {
   console.log("\n--- ELIMINAR SOCIO ---");
 
-  const id = await obtenerId("ID del socio: ");
-  if (!id) return;
+  const dniBusqueda = (await preguntar("DNI del socio: ")).toUpperCase();
+  if (!dniBusqueda) {
+    console.log("Error: el DNI es obligatorio.");
+    return;
+  }
 
   const socio = await socios.findOne({
-    _id: id,
+    dni: dniBusqueda,
     activo: true
   });
 
@@ -456,9 +474,9 @@ async function eliminarSocio(socios, prestamos) {
   }
 
   const prestamosPendientes = await prestamos.countDocuments({
-    socioId: id,
+    socioId: socio._id,
     activo: true,
-    estado: "prestado"
+    estado: "activo"
   });
 
   if (prestamosPendientes > 0) {
@@ -478,7 +496,7 @@ async function eliminarSocio(socios, prestamos) {
   }
 
   await socios.updateOne(
-    { _id: id },
+    { _id: socio._id },
     {
       $set: {
         activo: false,
@@ -518,7 +536,8 @@ async function listarPrestamos(prestamos, libros, socios) {
       ? `${socio.nombre} ${socio.apellidos}`
       : "No encontrado");
     console.log("Fecha de préstamo:", prestamo.fechaPrestamo);
-    console.log("Fecha de devolución:", prestamo.fechaDevolucion || "Pendiente");
+    console.log("Fecha prevista de devolución:", prestamo.devolucion.fechaPrevista);
+    console.log("Fecha real de devolución:", prestamo.devolucion.fechaReal || "Pendiente");
     console.log("Estado:", prestamo.estado);
   }
 
@@ -554,7 +573,8 @@ async function buscarPrestamo(prestamos, libros, socios) {
     ? `${socio.nombre} ${socio.apellidos}`
     : "No encontrado");
   console.log("Fecha de préstamo:", prestamo.fechaPrestamo);
-  console.log("Fecha de devolución:", prestamo.fechaDevolucion || "Pendiente");
+  console.log("Fecha prevista de devolución:", prestamo.devolucion.fechaPrevista);
+  console.log("Fecha real de devolución:", prestamo.devolucion.fechaReal || "Pendiente");
   console.log("Estado:", prestamo.estado);
 }
 
@@ -563,11 +583,14 @@ async function buscarPrestamo(prestamos, libros, socios) {
 async function crearPrestamo(prestamos, libros, socios) {
   console.log("\n--- REGISTRAR PRÉSTAMO ---");
 
-  const libroId = await obtenerId("ID del libro: ");
-  if (!libroId) return;
+  const isbn = await preguntar("ISBN del libro: ");
+  if (!isbn) {
+    console.log("Error: el ISBN es obligatorio.");
+    return;
+  }
 
   const libro = await libros.findOne({
-    _id: libroId,
+    isbn,
     activo: true
   });
 
@@ -581,11 +604,14 @@ async function crearPrestamo(prestamos, libros, socios) {
     return;
   }
 
-  const socioId = await obtenerId("ID del socio: ");
-  if (!socioId) return;
+  const dni = (await preguntar("DNI del socio: ")).toUpperCase();
+  if (!dni) {
+    console.log("Error: el DNI es obligatorio.");
+    return;
+  }
 
   const socio = await socios.findOne({
-    _id: socioId,
+    dni,
     activo: true
   });
 
@@ -595,16 +621,18 @@ async function crearPrestamo(prestamos, libros, socios) {
   }
 
   const fechaPrestamo = new Date();
-  const fechaLimite = new Date(fechaPrestamo);
-  fechaLimite.setDate(fechaLimite.getDate() + 14);
+  const fechaPrevista = new Date(fechaPrestamo);
+  fechaPrevista.setDate(fechaPrevista.getDate() + 14);
 
   const nuevoPrestamo = {
-    libroId,
-    socioId,
+    libroId: libro._id,
+    socioId: socio._id,
     fechaPrestamo,
-    fechaLimite,
-    fechaDevolucion: null,
-    estado: "prestado",
+    estado: "activo",
+    devolucion: {
+      fechaPrevista,
+      fechaReal: null
+    },
     activo: true,
     createdAt: new Date(),
     updatedAt: new Date()
@@ -613,7 +641,7 @@ async function crearPrestamo(prestamos, libros, socios) {
   await prestamos.insertOne(nuevoPrestamo);
 
   await libros.updateOne(
-    { _id: libroId },
+    { _id: libro._id },
     {
       $set: {
         disponible: false,
@@ -623,7 +651,7 @@ async function crearPrestamo(prestamos, libros, socios) {
   );
 
   console.log("Préstamo registrado correctamente.");
-  console.log("Fecha límite de devolución:", fechaLimite.toLocaleDateString());
+  console.log("Fecha prevista de devolución:", fechaPrevista.toLocaleDateString());
 }
 
 // UPDATE: REGISTRAR DEVOLUCIÓN DE UN PRÉSTAMO
@@ -651,6 +679,11 @@ async function modificarPrestamo(prestamos, libros) {
     return;
   }
 
+  if (prestamo.estado !== "activo") {
+    console.log("Solo se puede registrar la devolución de un préstamo con estado activo.");
+    return;
+  }
+
   const confirmar = (
     await preguntar("¿Confirmar la devolución del libro? (s/n): ")
   ).toLowerCase();
@@ -660,14 +693,14 @@ async function modificarPrestamo(prestamos, libros) {
     return;
   }
 
-  const fechaDevolucion = new Date();
+  const fechaReal = new Date();
 
   await prestamos.updateOne(
     { _id: id },
     {
       $set: {
         estado: "devuelto",
-        fechaDevolucion,
+        "devolucion.fechaReal": fechaReal,
         updatedAt: new Date()
       }
     }
@@ -704,7 +737,7 @@ async function eliminarPrestamo(prestamos) {
     return;
   }
 
-  if (prestamo.estado === "prestado") {
+  if (prestamo.estado === "activo") {
     console.log(
       "No se puede desactivar un préstamo que todavía está pendiente."
     );
@@ -743,7 +776,7 @@ async function menuLibros(libros, prestamos) {
   do {
     console.log("\n========== MENÚ LIBROS ==========");
     console.log("1. Listar libros");
-    console.log("2. Buscar libro por ID");
+    console.log("2. Buscar libro por ISBN");
     console.log("3. Registrar libro");
     console.log("4. Modificar libro");
     console.log("5. Desactivar libro");
@@ -785,7 +818,7 @@ async function menuSocios(socios, prestamos) {
   do {
     console.log("\n========== MENÚ SOCIOS ==========");
     console.log("1. Listar socios");
-    console.log("2. Buscar socio por ID");
+    console.log("2. Buscar socio por DNI");
     console.log("3. Registrar socio");
     console.log("4. Modificar socio");
     console.log("5. Desactivar socio");
