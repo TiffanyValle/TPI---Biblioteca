@@ -2,9 +2,10 @@
   "name": "biblioteca",
   "private": true,
   "scripts": {
-    "start": "node appCompleta.js",
+    "start": "node app.js",
     "probar-conexion": "node prueba.js",
-    "backup": "powershell -NoProfile -File backup.ps1"
+    "backup": "powershell -NoProfile -File backup.ps1",
+    "dev": "node --watch app.js"
   },
   "dependencies": {
     "dotenv": "^18.0.9",
