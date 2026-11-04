@@ -45,12 +45,6 @@ npm start
 
 Se abrirá el menú de gestión de libros, socios y préstamos. Elegí `0` en el menú principal para salir.
 
-Para comprobar únicamente la conexión con MongoDB:
-
-```powershell
-npm run probar-conexion
-```
-
 ## Ejecutar el resguardo desde VS Code
 
 Para respaldar la base necesitás [MongoDB Database Tools](https://www.mongodb.com/docs/database-tools/installation/), que incluye `mongodump`. Instalá las herramientas y agregá la carpeta que contiene `mongodump.exe` al `PATH` de Windows. Luego abrí una terminal nueva y comprobá su disponibilidad:
@@ -92,3 +86,27 @@ Si dos respaldos coinciden en el mismo segundo, se agrega un sufijo como `17-30-
 
 `.env`, `node_modules/` y `resguardos_tpi/` están excluidos de Git. Se versionan `.env.example`, `package.json` y `package-lock.json`.
 
+## Estructura del proyecto
+
+La aplicación está desarrollada con Node.js y MongoDB Atlas. Utiliza una estructura modular para separar las operaciones de gestión de libros, socios y préstamos.
+
+- app.js: menú principal de la aplicación.
+
+- config/database.js: conexión con MongoDB Atlas.
+
+- modules/libros.js: operaciones de gestión de libros.
+
+- modules/socios.js: operaciones de gestión de socios.
+
+- modules/prestamos.js: operaciones de gestión de préstamos.
+
+- utils/entrada.js: funciones auxiliares para ingresar datos.
+
+- backup.ps1: script de respaldo de la base de datos.
+
+- cargar-config-backup.js: configuración utilizada para el respaldo.
+
+## Alumnos responsables del desarrollo:
+- Damian Geisser
+- Tiffany Zoe Valle
+- Stefania Peralta

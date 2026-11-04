@@ -3,7 +3,6 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "probar-conexion": "node prueba.js",
     "backup": "powershell -NoProfile -File backup.ps1",
     "dev": "node --watch app.js"
   },
